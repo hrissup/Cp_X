@@ -33,6 +33,8 @@ public class DashboardUI extends Application { // MAIN CLASS [Standard JAvaFX gr
 
     private PulseEngine pulseEngine; // Reference for backend engine
 
+    private DatabaseManager databaseManager; // Reference for DB layer
+
     private int tickCount = 0; // [X-Axis : Time]
 
     
@@ -41,6 +43,9 @@ public class DashboardUI extends Application { // MAIN CLASS [Standard JAvaFX gr
     public void start(Stage stage) {
 
         pulseEngine = new PulseEngine(); // Backend Engine
+
+        databaseManager = new DatabaseManager();
+        databaseManager.start();
 
         // Whenever pulseEngine emits a pulse, call onNewSnapshot()
         pulseEngine.setOnPulse(this::onNewSnapshot);
@@ -110,6 +115,9 @@ public class DashboardUI extends Application { // MAIN CLASS [Standard JAvaFX gr
         if(pulseEngine != null) {
             pulseEngine.stop();
         }
+        if (databaseManager != null) {
+            databaseManager.stop();
+        }
     }
 
     private void onNewSnapshot(HardwareSnapshot snapshot) {
@@ -143,6 +151,10 @@ public class DashboardUI extends Application { // MAIN CLASS [Standard JAvaFX gr
                 snapshot.totalRamGb()
         ));
         uptimeLabel.setText("Uptime: " + formatUptime(snapshot.uptimeSeconds()));
+
+        if (databaseManager != null) {
+            databaseManager.saveSnapshot(snapshot);
+        }
     }
 
     private NumberAxis createTimeAxis() {
